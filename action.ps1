@@ -91,7 +91,7 @@ if ($status) {
     git add -A .
     if ($LASTEXITCODE -ne 0) { throw "Exit code is $LASTEXITCODE" }
 
-    git commit -m "Updating image to $NewTag"
+    git commit -m "Updating $YamlPathExpression to $Value in $Path"
     if ($LASTEXITCODE -ne 0) { throw "Exit code is $LASTEXITCODE" }
 
     git push

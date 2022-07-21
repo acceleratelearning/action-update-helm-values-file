@@ -8,7 +8,7 @@ param (
     [String] $GitHubAppKey = $env:INPUT_GITHUB_APP_KEY
 )
 
-Install-Module -Name powershell-yaml -Scope CurrentUser -Confirm:$False 
+Install-Module -Name powershell-yaml -Scope CurrentUser -Force -Confirm:$False 
 
 function Base64UrlEncodeBytes([Byte[]] $bytes) {
     [Convert]::ToBase64String($bytes) -replace '\+', '-' -replace '/', '_' -replace '='

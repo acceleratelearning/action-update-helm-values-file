@@ -4,6 +4,10 @@ inputs:
   github-repo:
     description: The url for the github repo to update
     required: true
+  branch-name:
+    description: The branch of the github repo to update
+    required: false
+    default: main
   path:
     description: The path of the values file
     required: true
@@ -27,6 +31,7 @@ runs:
       run: ${{ github.action_path }}/action.ps1
       env:
         INPUT_GITHUB_REPO: ${{ inputs.github-repo }}
+        INPUT_BRANCH_NAME: ${{ inputs.branch-name }}
         INPUT_PATH: ${{ inputs.path }}
         INPUT_YAML_PATH_EXPRESSION: ${{ inputs.yaml-path-expression }}
         INPUT_VALUE: ${{ inputs.value }}

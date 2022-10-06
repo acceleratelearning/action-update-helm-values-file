@@ -1,6 +1,7 @@
 #!/usr/bin/env pwsh
 param (
     [string] $GitHubRepository = $env:INPUT_GITHUB_REPO,
+    [string] $BranchName = $env:INPUT_BRANCH_NAME,
     [String] $Path = $env:INPUT_PATH,
     [String] $YamlPathExpression = $env:INPUT_YAML_PATH_EXPRESSION,
     [String] $Value = $env:INPUT_VALUE,
@@ -71,17 +72,18 @@ $builder.Password = $token
 if (-Not $builder.Path.EndsWith('.git')) {
     $builder.Path = "$($builder.Path).git"
 }
-$builder.ToString()
+$repo_url = $builder.ToString()
 
-git clone $builder.ToString() $repo_dir
-if ($LASTEXITCODE -ne 0) { throw "Exit code is $LASTEXITCODE" }
+git clone $repo_url $repo_dir
+if ($LASTEXITCODE -ne 0) { throw "Unable to clone $repo_url to $redo_dir : Exit code is $LASTEXITCODE" }
 
 Push-Location $repo_dir
 
-$values = Get-Content $Path | ConvertFrom-Yaml  
-Invoke-Expression "`$values$YamlPathExpression = `$Value"
-$values | ConvertTo-Yaml | Set-Content $Path
+git checkout $BranchName
+if ($LASTEXITCODE -ne 0) { throw "Unable to checkout branch $BranchName : Exit code is $LASTEXITCODE" }
 
+$yqExpression = "$YamlPathExpression = `"`"$Value`"`""
+yq -i $yqExpression $Path
 
 $status = git status --porcelain
 if ($status) {
@@ -89,13 +91,13 @@ if ($status) {
     git config user.email github-actions@github.com
     
     git add -A .
-    if ($LASTEXITCODE -ne 0) { throw "Exit code is $LASTEXITCODE" }
+    if ($LASTEXITCODE -ne 0) { throw "Unable to add file to git commit: Exit code is $LASTEXITCODE" }
 
     git commit -m "Updating $YamlPathExpression to $Value in $Path"
-    if ($LASTEXITCODE -ne 0) { throw "Exit code is $LASTEXITCODE" }
+    if ($LASTEXITCODE -ne 0) { throw "Unable to commit: Exit code is $LASTEXITCODE" }
 
     git push
-    if ($LASTEXITCODE -ne 0) { throw "Exit code is $LASTEXITCODE" }
+    if ($LASTEXITCODE -ne 0) { throw "Unable to push commit: Exit code is $LASTEXITCODE" }
 }
 else {
     Write-Warning "No changes to commit"

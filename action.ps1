@@ -2,7 +2,8 @@
 param (
     [string] $GitHubRepository = $env:INPUT_GITHUB_REPO,
     [string] $BranchName = $env:INPUT_BRANCH_NAME,
-    [String] $Path = $env:INPUT_PATH,
+    [String] $ValuesDirectory = $env:INPUT_VALUES_DIRECTORY,
+    [String] $SourceBranch = $env:INPUT_SOURCE_BRANCH,
     [String] $YamlPathExpression = $env:INPUT_YAML_PATH_EXPRESSION,
     [String] $Value = $env:INPUT_VALUE,
     [String] $GitHubAppId = $env:INPUT_GITHUB_APP_ID,
@@ -65,6 +66,16 @@ $token = Get-GithubAppToken -GitHubAppId $GitHubAppId -GitHubAppKey $GitHubAppKe
 
 $repo_dir = Join-Path $env:RUNNER_TEMP '.repo'
 
+$values_file_name = switch -wildcard($SourceBranch) {
+    "dev" { "values-dev.yaml" }
+    "release" { "values-release.yaml" }
+    "release-*" { "values-release.yaml" }
+    "main" { "values-main.yaml" }
+    "main-review" { "values-main-review.yaml" }
+    default { "values-dev.yaml.yaml" }
+}
+$path = Join-Path $ValuesDirectory $values_file_name
+
 # Get cloneable url with embedded token
 $builder = [UriBuilder]::new($GitHubRepository)
 $builder.UserName = 'token'
@@ -83,7 +94,7 @@ git checkout $BranchName
 if ($LASTEXITCODE -ne 0) { throw "Unable to checkout branch $BranchName : Exit code is $LASTEXITCODE" }
 
 $yqExpression = "$YamlPathExpression = `"`"$Value`"`""
-yq -i $yqExpression $Path
+yq -i $yqExpression $path
 
 $status = git status --porcelain
 if ($status) {

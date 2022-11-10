@@ -8,8 +8,11 @@ inputs:
     description: The branch of the github repo to update
     required: false
     default: main
-  path:
-    description: The path of the values file
+  values-directory:
+    description: The path to find the values file
+    required: true
+  source-branch:
+    description: Use the source-branch to determine which values-*.yaml file to use
     required: true
   yaml-path-expression:
     description: The yaml path expression of the value to change
@@ -32,7 +35,8 @@ runs:
       env:
         INPUT_GITHUB_REPO: ${{ inputs.github-repo }}
         INPUT_BRANCH_NAME: ${{ inputs.branch-name }}
-        INPUT_PATH: ${{ inputs.path }}
+        INPUT_VALUES_DIRECTORY: ${{ inputs.values-directory }}
+        INPUT_SOURCE_BRANCH: ${{ inputs.source-branch }}
         INPUT_YAML_PATH_EXPRESSION: ${{ inputs.yaml-path-expression }}
         INPUT_VALUE: ${{ inputs.value }}
         INPUT_GITHUB_APP_ID: ${{ inputs.github-app-id }}

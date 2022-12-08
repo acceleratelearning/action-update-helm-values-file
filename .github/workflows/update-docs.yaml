@@ -1,0 +1,21 @@
+name: Update Docs
+on:
+  pull_request:
+    paths:
+      - 'doc-gen/header.md'
+      - 'doc-gen/content.md'
+      - 'action.yaml'
+jobs:
+  update-docs:
+    name: Update documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Update README
+        id: update-readme
+        uses: acceleratelearning/action-update-repo-documentation@v1
+        with:
+          repo-type: "action"
+          file-name: "action.yaml"
